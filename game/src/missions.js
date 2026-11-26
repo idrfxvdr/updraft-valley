@@ -56,7 +56,8 @@ export function createMission(id, world) {
 
   function nearRunway(flight, index) {
     const r = WORLD.runways[index];
-    return Math.hypot(flight.pos.x - r.x, flight.pos.z - r.z) < r.len / 2 && flight.onGround;
+    const st = flight.state;
+    return Math.hypot(st.pos.x - r.x, st.pos.z - r.z) < r.len / 2 && st.onGround;
   }
 
   m.reset = (flight) => {
@@ -102,7 +103,7 @@ export function createMission(id, world) {
     if (def.id !== 'supply' || m.phase !== 1 || m.crateDropped) return false;
     const st = m.flightState;
     const dc = Math.hypot(st.pos.x - WORLD.clearing.x, st.pos.z - WORLD.clearing.z);
-    const above = st.pos.y - WORLD.clearing.y;
+    const above = st.pos.y - world.clearing.y;
     if (dc < WORLD.clearing.r && above < 80 && above > 5) {
       m.crateDropped = true;
       m.phase = 2;
@@ -126,7 +127,7 @@ export function createMission(id, world) {
     if (m.crate && m.crate.userData.vy !== undefined) {
       m.crate.userData.vy -= 9.81 * dt;
       m.crate.position.y += m.crate.userData.vy * dt;
-      const floor = WORLD.clearing.y + 3;
+      const floor = world.clearing.y + 3;
       if (m.crate.position.y < floor) {
         m.crate.position.y = floor;
         m.crate.userData.vy = undefined;

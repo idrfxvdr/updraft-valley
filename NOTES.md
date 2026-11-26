@@ -28,16 +28,22 @@ airstrips. Three.js r180 vendored (minified). Static files under `game/`, no net
   (quality stepped down to fit 256 KiB), prints byte sizes, smoke-tests (no console errors,
   title loads, each mission starts, 3 s throttle flight changes alt/speed).
 
-## True outputs (final)
-- `node tools/shots.mjs` → SMOKE OK, 0 console errors; screenshots byte-for-byte deterministic.
-  - 1-cover.jpg 123074 B, 2-approach.jpg 95655 B, 3-cockpit.jpg 100407 B, 4-debrief.jpg 85179 B
-    (all 1280x720 JPEG, well under 256 KiB; quality 92)
+## True outputs (final, v2 polish)
+- `node tools/shots.mjs` → SMOKE OK, 0 problems; screenshots byte-for-byte deterministic.
+  - 1-cover.jpg ~112 KB (95 kn), 2-approach.jpg ~86 KB (65 kn, -500 fpm),
+    3-cockpit.jpg ~103 KB (100 kn), 4-debrief.jpg ~85 KB — all 1280x720 JPEG, < 256 KiB.
+  - Smoke asserts airspeed > 40 kn in shots 1-3.
 - `MAKEFUN_OUTPUT_DIR=out node main.ts` → out/{game,screenshots,dossier.json};
-  dossier.json 624651 bytes (≤ 1,500,000). Dossier text ~82 KB, 14 sources shown in full.
-- Headless flight sim: full throttle climbs+accelerates, idle descends+decelerates, takeoff+climb
-  works, gentle landing grades A/B, hard/bank landing crashes, stall warning fires.
-- Headless mission sim: all four missions reach `complete` (rings 10/10, supply drop→land,
-  ridge pass→land far, free land).
+  dossier.json 601274 bytes (≤ 1,500,000). Dossier text ~82 KB, 14 sources in full.
+- Headless flight sim: climb/descend/takeoff/land/crash/stall all correct.
+- Headless mission sim: all four missions reach `complete`.
+
+## v2 polish (this round)
+- Fixed staged airspeed: shots set velocity-derived airspeed/vertical speed (was 0 KNOTS).
+- Chase camera pulled back to ~3.4 wingspans, lower look; whole aircraft in lower-middle third.
+- Warmer golden hour: low warm sun, warm directional/hemi/ambient light, orange horizon.
+- Approach staged closer/lower so runway markings + windsock read; cockpit panel lit.
 
 ## Status: complete
-Every mission works, 4 screenshots exist within limits, main.ts produces the output, tree clean.
+Every mission works, airspeed non-zero in shots 1-3, 4 screenshots within limits, main.ts
+produces the output, tree clean.

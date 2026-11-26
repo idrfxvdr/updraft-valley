@@ -3,10 +3,10 @@
 import * as THREE from 'three';
 
 export function createSky(scene, renderer) {
-  const top = new THREE.Color('#3f6fb5');
-  const mid = new THREE.Color('#9fc0e8');
-  const horizon = new THREE.Color('#ffd7a0');
-  const sunColor = new THREE.Color('#fff3d0');
+  const top = new THREE.Color('#2f5fa8');
+  const mid = new THREE.Color('#8fb4e0');
+  const horizon = new THREE.Color('#ffb066');
+  const sunColor = new THREE.Color('#fff0c4');
 
   // Gradient dome via vertex colours on a big back-side sphere.
   const domeGeo = new THREE.SphereGeometry(5200, 32, 20);
@@ -26,27 +26,27 @@ export function createSky(scene, renderer) {
   dome.name = 'sky';
   scene.add(dome);
 
-  // Sun disc + light.
-  const sunDir = new THREE.Vector3(-0.55, 0.34, -0.76).normalize();
-  const sun = new THREE.Mesh(new THREE.CircleGeometry(140, 24), new THREE.MeshBasicMaterial({ color: sunColor, fog: false }));
+  // Sun disc + light: low in the west for a long golden-hour glow.
+  const sunDir = new THREE.Vector3(-0.62, 0.19, -0.76).normalize();
+  const sun = new THREE.Mesh(new THREE.CircleGeometry(150, 24), new THREE.MeshBasicMaterial({ color: sunColor, fog: false }));
   sun.position.copy(sunDir).multiplyScalar(4200);
   sun.lookAt(0, 0, 0);
   scene.add(sun);
-  const glow = new THREE.Mesh(new THREE.CircleGeometry(320, 24), new THREE.MeshBasicMaterial({ color: '#ffdca0', transparent: true, opacity: 0.35, fog: false, depthWrite: false }));
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(420, 24), new THREE.MeshBasicMaterial({ color: '#ffcf8a', transparent: true, opacity: 0.4, fog: false, depthWrite: false }));
   glow.position.copy(sunDir).multiplyScalar(4150);
   glow.lookAt(0, 0, 0);
   scene.add(glow);
 
-  const sunLight = new THREE.DirectionalLight('#fff0d2', 2.1);
+  const sunLight = new THREE.DirectionalLight('#ffcf9a', 2.5);
   sunLight.position.copy(sunDir).multiplyScalar(1000);
   scene.add(sunLight);
-  const hemi = new THREE.HemisphereLight('#cfe2ff', '#4a5a3a', 0.75);
+  const hemi = new THREE.HemisphereLight('#ffd9b4', '#3a2f22', 0.7);
   scene.add(hemi);
-  const amb = new THREE.AmbientLight('#ffffff', 0.25);
+  const amb = new THREE.AmbientLight('#ffe6c4', 0.32);
   scene.add(amb);
 
-  // Soft fog toward the horizon colour.
-  scene.fog = new THREE.Fog(horizon.clone().lerp(mid, 0.35), 900, 4200);
+  // Soft fog toward the warm horizon colour.
+  scene.fog = new THREE.Fog(horizon.clone().lerp(mid, 0.22), 1000, 4400);
 
   // A few flat, soft clouds.
   const clouds = new THREE.Group();

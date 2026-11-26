@@ -31,9 +31,11 @@ export function createCamera(camera) {
     q.copy(st.quat);
 
     if (mode === 'chase') {
-      // Behind (+Z local) and above, pulled back a touch with speed.
-      const back = 8.5 + Math.min(4, st.airspeed * 0.05);
-      offset.set(0, 3.0, back).applyQuaternion(q);
+      // Trail well behind (about 3.4 wingspans) and a little above, so the whole aircraft sits in
+      // the lower-middle third and the ring, valley and runway ahead read clearly.
+      const span = 13.5;
+      const back = span * 3.4 + Math.min(6, st.airspeed * 0.06);
+      offset.set(0, 6.2, back).applyQuaternion(q);
       desired.copy(st.pos).add(offset);
       const groundY = heightAt(desired.x, desired.z) + 3.0;
       if (desired.y < groundY) desired.y = groundY;
@@ -44,7 +46,7 @@ export function createCamera(camera) {
         smoothPos.lerp(desired, 1 - Math.exp(-dt * 3.6));
       }
       camera.position.copy(smoothPos);
-      look.copy(st.pos).addScaledVector(fwd, 14).addScaledVector(up, 1.2);
+      look.copy(st.pos).addScaledVector(fwd, 30).addScaledVector(up, 4.0);
       camera.up.copy(UP);
       camera.lookAt(look);
     } else {

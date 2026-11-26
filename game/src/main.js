@@ -502,20 +502,30 @@ function placeFlight(opts) {
   syncAircraft();
 }
 
+// The HUD reads airspeed and vertical speed from the flight state, which the live model fills in
+// each step; a staged shot must set them from the velocity it places, or the panel reads zero.
+function syncAir() {
+  flight.state.airspeed = flight.state.vel.length();
+  flight.state.verticalSpeed = flight.state.vel.y;
+}
+
 function stageShot(name) {
   cam.setMode('chase');
   state.setScreen(SCREEN.FLYING);
+  // Expose the flight state so the screenshot script can assert live values (e.g. airspeed).
+  window.__game = { flight, state, get mission() { return mission; } };
   if (name === 'cover') {
     mission = createMission('rings', terrain);
     const r = terrain.rings[4];
     const dir = new THREE.Vector3(0, 0, 1);
-    const pos = r.pos.clone().addScaledVector(dir, -95);
+    const pos = r.pos.clone().addScaledVector(dir, -110);
     const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-    q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -0.3));
-    q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.06));
-    placeFlight({ x: pos.x, y: pos.y + 4, z: pos.z, throttle: 0.82, fuel: 0.9 });
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -0.24));
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.05));
+    placeFlight({ x: pos.x, y: pos.y + 5, z: pos.z, throttle: 0.8, fuel: 0.9 });
     flight.state.quat.copy(q);
-    flight.state.vel.set(0, 0, 56).applyQuaternion(q);
+    flight.state.vel.set(0, 0, 49).applyQuaternion(q); // ~95 kn
+    syncAir();
     for (const rr of terrain.rings) rr.mesh.visible = true;
     mission.ringsTaken = 3;
     for (let i = 0; i < 3; i += 1) { terrain.rings[i].taken = true; terrain.rings[i].mesh.visible = false; }
@@ -523,9 +533,10 @@ function stageShot(name) {
     mission = createMission('supply', terrain);
     const r = WORLD.runways[0];
     const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-    placeFlight({ x: r.x, y: r.y + 30, z: r.z + 200, throttle: 0.34, fuel: 0.8, flaps: 1 });
+    placeFlight({ x: r.x, y: r.y + 26, z: r.z + 175, throttle: 0.4, fuel: 0.8, flaps: 1 });
     flight.state.quat.copy(q);
-    flight.state.vel.set(0, -1.2, -36).applyQuaternion(q);
+    flight.state.vel.set(0, -2.54, -33.4).applyQuaternion(q); // ~65 kn, -500 fpm
+    syncAir();
     mission.phase = 2;
     mission.goal = 'Return to Valley Strip and land';
   } else if (name === 'cockpit') {
@@ -533,7 +544,8 @@ function stageShot(name) {
     cam.setMode('cockpit');
     placeFlight({ x: -120, y: 300, z: 700, throttle: 0.72, fuel: 0.85 });
     flight.state.quat.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * 0.95);
-    flight.state.vel.set(0, 0, 52).applyQuaternion(flight.state.quat);
+    flight.state.vel.set(0, 0, 51.4).applyQuaternion(flight.state.quat); // ~100 kn
+    syncAir();
     mission.goal = 'Explore the valley — land to finish';
   } else if (name === 'debrief') {
     mission = createMission('supply', terrain);

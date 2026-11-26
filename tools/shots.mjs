@@ -82,7 +82,12 @@ for (const shot of plan) {
     if (bytes <= 262144 || quality <= 0.3) break;
     quality -= 0.08;
   }
-  console.log(`${shot.file}: ${bytes} bytes (quality ${Math.round(quality * 100)})`);
+  let airKn = null;
+  if (shot.name === 'cover' || shot.name === 'approach' || shot.name === 'cockpit') {
+    airKn = await page.evaluate(() => window.__game.flight.state.airspeed * 1.94384);
+    if (!(airKn > 40)) errors.push(`shot ${shot.name}: airspeed ${airKn?.toFixed(1)} kn not > 40`);
+  }
+  console.log(`${shot.file}: ${bytes} bytes (quality ${Math.round(quality * 100)})${airKn !== null ? `, airspeed ${airKn.toFixed(0)} kn` : ''}`);
 }
 
 // ---- smoke test ----------------------------------------------------------
@@ -115,7 +120,7 @@ const flight = await page.evaluate(() => {
 const changed = flight.b.alt !== flight.a.alt || flight.b.speed !== flight.a.speed || flight.c.speed !== flight.b.speed;
 console.log(`3 s flight: alt ${flight.a.alt.toFixed(1)} -> ${flight.b.alt.toFixed(1)} -> ${flight.c.alt.toFixed(1)}, speed ${flight.a.speed.toFixed(1)} -> ${flight.b.speed.toFixed(1)} -> ${flight.c.speed.toFixed(1)}`);
 console.log(`throttle changes altitude/speed: ${changed}`);
-console.log(`console errors: ${errors.length}`);
+console.log(`problems (console errors + shot checks): ${errors.length}`);
 for (const e of errors) console.log(`  ${e}`);
 
 await browser.close();

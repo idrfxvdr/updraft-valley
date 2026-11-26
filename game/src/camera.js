@@ -48,8 +48,8 @@ export function createCamera(camera) {
       camera.up.copy(UP);
       camera.lookAt(look);
     } else {
-      // Cockpit: at the pilot's eye, looking forward along the nose.
-      offset.set(0, 1.05, -0.9).applyQuaternion(q);
+      // Cockpit: at the pilot's eye, looking forward over the nose.
+      offset.set(0, 1.2, -2.6).applyQuaternion(q);
       camera.position.copy(st.pos).add(offset);
       cockpitQ.setFromEuler(new THREE.Euler(-0.04, 0, 0));
       camera.quaternion.copy(q).multiply(cockpitQ);

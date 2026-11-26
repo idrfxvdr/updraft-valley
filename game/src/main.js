@@ -355,6 +355,9 @@ function render() {
     camera.up.set(0, 1, 0);
     camera.lookAt(0, 120, 0);
   }
+  // In cockpit view the camera sits at the pilot's eye, so hide the exterior model to keep the
+  // forward view clean; the lit instrument panel is drawn by the HUD overlay instead.
+  aircraft.group.visible = cam.mode !== 'cockpit';
   renderer.render(scene, camera);
 
   hudCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -506,7 +509,7 @@ function stageShot(name) {
     mission = createMission('rings', terrain);
     const r = terrain.rings[4];
     const dir = new THREE.Vector3(0, 0, 1);
-    const pos = r.pos.clone().addScaledVector(dir, -150);
+    const pos = r.pos.clone().addScaledVector(dir, -95);
     const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
     q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -0.3));
     q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.06));
@@ -520,9 +523,9 @@ function stageShot(name) {
     mission = createMission('supply', terrain);
     const r = WORLD.runways[0];
     const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-    placeFlight({ x: r.x, y: r.y + 42, z: r.z + 300, throttle: 0.34, fuel: 0.8, flaps: 1 });
+    placeFlight({ x: r.x, y: r.y + 30, z: r.z + 200, throttle: 0.34, fuel: 0.8, flaps: 1 });
     flight.state.quat.copy(q);
-    flight.state.vel.set(0, -1.4, -38).applyQuaternion(q);
+    flight.state.vel.set(0, -1.2, -36).applyQuaternion(q);
     mission.phase = 2;
     mission.goal = 'Return to Valley Strip and land';
   } else if (name === 'cockpit') {

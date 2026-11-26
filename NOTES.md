@@ -28,17 +28,16 @@ airstrips. Three.js r180 vendored (minified). Static files under `game/`, no net
   (quality stepped down to fit 256 KiB), prints byte sizes, smoke-tests (no console errors,
   title loads, each mission starts, 3 s throttle flight changes alt/speed).
 
-## True outputs (last run)
-- `node tools/shots.mjs` → SMOKE OK, 0 console errors.
-  - 1-cover.jpg ~121 KB, 2-approach.jpg ~94 KB, 3-cockpit.jpg ~102 KB, 4-debrief.jpg ~85 KB
-    (all 1280x720, well under 256 KiB; quality 92)
+## True outputs (final)
+- `node tools/shots.mjs` → SMOKE OK, 0 console errors; screenshots byte-for-byte deterministic.
+  - 1-cover.jpg 123074 B, 2-approach.jpg 95655 B, 3-cockpit.jpg 100407 B, 4-debrief.jpg 85179 B
+    (all 1280x720 JPEG, well under 256 KiB; quality 92)
 - `MAKEFUN_OUTPUT_DIR=out node main.ts` → out/{game,screenshots,dossier.json};
-  dossier.json ~623 KB (≤ 1,500,000). Dossier text ~82 KB, 14 sources in full.
-- Headless flight sim (`/tmp`): full throttle climbs+accelerates, idle descends+decelerates,
-  takeoff+climb works, gentle landing grades A/B, hard/bank landing crashes, stall warning fires.
+  dossier.json 624651 bytes (≤ 1,500,000). Dossier text ~82 KB, 14 sources shown in full.
+- Headless flight sim: full throttle climbs+accelerates, idle descends+decelerates, takeoff+climb
+  works, gentle landing grades A/B, hard/bank landing crashes, stall warning fires.
+- Headless mission sim: all four missions reach `complete` (rings 10/10, supply drop→land,
+  ridge pass→land far, free land).
 
-## Next
-- Improve visual quality of the four screenshots (cover especially) — richer terrain, better
-  framing, more legible instruments.
-- Verify mission completion paths end-to-end (ring pass, supply drop, ridge landing).
-- Re-run shots + main.ts, keep dossier < 1.5 MB, commit.
+## Status: complete
+Every mission works, 4 screenshots exist within limits, main.ts produces the output, tree clean.

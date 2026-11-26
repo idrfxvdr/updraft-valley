@@ -34,6 +34,7 @@ export function createTerrain(scene, noise) {
   const group = new THREE.Group();
   group.name = 'terrain';
   scene.add(group);
+  let clock = 0;
 
   // ---- height field ------------------------------------------------------
   function rawHeight(x, z) {
@@ -284,10 +285,10 @@ export function createTerrain(scene, noise) {
     ringGroup,
     ringMat,
     update(dt) {
-      // Windsocks swing gently; rings pulse.
-      const t = performance.now() / 1000;
-      for (const r of runwayHandles) r.sock.rotation.y = Math.sin(t * 0.8) * 0.25;
-      ringMat.emissiveIntensity = 1.1 + Math.sin(t * 3) * 0.5;
+      // Windsocks swing gently; rings pulse. Time is accumulated so a staged shot is deterministic.
+      clock += dt;
+      for (const r of runwayHandles) r.sock.rotation.y = Math.sin(clock * 0.8) * 0.25;
+      ringMat.emissiveIntensity = 1.1 + Math.sin(clock * 3) * 0.5;
     },
   };
 }

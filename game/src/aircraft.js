@@ -93,13 +93,15 @@ export function createAircraft() {
     if (o.isMesh) o.castShadow = false;
   });
 
+  let propClock = 0;
   return {
     group,
     propeller: prop,
     /** Spin the propeller and wobble it a touch at high throttle. */
     update(dt, throttle) {
+      propClock += dt;
       prop.rotation.z += dt * (8 + throttle * 46);
-      prop.rotation.x = Math.sin(performance.now() / 90) * 0.02 * throttle;
+      prop.rotation.x = Math.sin(propClock * 11) * 0.02 * throttle;
     },
   };
 }

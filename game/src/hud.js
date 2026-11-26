@@ -212,15 +212,17 @@ export function drawHUD(ctx, W, H, view) {
   const mapSize = Math.min(190, H * 0.28);
   drawMinimap(ctx, 16, H - mapSize - 16, mapSize, view);
 
-  // Bottom-centre status line.
-  const status = [];
-  status.push(st.flaps > 0.05 ? `FLAPS ${Math.round(st.flaps * 100)}%` : 'FLAPS UP');
-  status.push('GEAR ▼');
-  if (st.brakes) status.push('BRAKE');
-  if (st.onGround) status.push('GROUND');
-  const line = status.join('   ·   ');
-  panel(ctx, W / 2 - 190, H - 54, 380, 38, 8);
-  glowText(ctx, line, W / 2, H - 28, '#cfe6f2', '600 16px ui-monospace, monospace', 'center');
+  // Bottom-centre status line (hidden in cockpit, where the panel owns the bottom).
+  if (view.mode !== 'cockpit') {
+    const status = [];
+    status.push(st.flaps > 0.05 ? `FLAPS ${Math.round(st.flaps * 100)}%` : 'FLAPS UP');
+    status.push('GEAR ▼');
+    if (st.brakes) status.push('BRAKE');
+    if (st.onGround) status.push('GROUND');
+    const line = status.join('   ·   ');
+    panel(ctx, W / 2 - 190, H - 54, 380, 38, 8);
+    glowText(ctx, line, W / 2, H - 28, '#cfe6f2', '600 16px ui-monospace, monospace', 'center');
+  }
 
   // Stall warning.
   if (st.stall) {

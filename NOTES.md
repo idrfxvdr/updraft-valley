@@ -30,12 +30,15 @@ airstrips. Three.js r180 vendored (minified). Static files under `game/`, no net
 
 ## True outputs (last run)
 - `node tools/shots.mjs` → SMOKE OK, 0 console errors.
-  - 1-cover.jpg 121812 B, 2-approach.jpg 94531 B, 3-cockpit.jpg 102719 B, 4-debrief.jpg 84913 B
+  - 1-cover.jpg ~121 KB, 2-approach.jpg ~94 KB, 3-cockpit.jpg ~102 KB, 4-debrief.jpg ~85 KB
+    (all 1280x720, well under 256 KiB; quality 92)
 - `MAKEFUN_OUTPUT_DIR=out node main.ts` → out/{game,screenshots,dossier.json};
-  dossier.json 623309 bytes (≤ 1,500,000). Dossier text 81617 B, 14 sources in full.
+  dossier.json ~623 KB (≤ 1,500,000). Dossier text ~82 KB, 14 sources in full.
+- Headless flight sim (`/tmp`): full throttle climbs+accelerates, idle descends+decelerates,
+  takeoff+climb works, gentle landing grades A/B, hard/bank landing crashes, stall warning fires.
 
 ## Next
 - Improve visual quality of the four screenshots (cover especially) — richer terrain, better
   framing, more legible instruments.
-- Verify flight feel (throttle/climb) and mission completion paths end-to-end.
+- Verify mission completion paths end-to-end (ring pass, supply drop, ridge landing).
 - Re-run shots + main.ts, keep dossier < 1.5 MB, commit.

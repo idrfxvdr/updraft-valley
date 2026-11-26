@@ -376,7 +376,7 @@ function flyStep(dt, controls) {
   const st = flight.state;
   const gy = terrain.heightAt(st.pos.x, st.pos.z);
   const onR = isOnRunway(st.pos.x, st.pos.z);
-  const ev = flight.groundContact(gy, onR);
+  const ev = flight.groundContact(gy, onR, dt);
   if (ev === 'crashed') {
     endSortie(false);
     return;

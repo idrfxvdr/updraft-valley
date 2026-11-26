@@ -8,7 +8,7 @@ const RHO = 1.225;
 const MASS = 1000;
 const WING = 16;
 const G = 9.81;
-const MAX_THRUST = 2600;
+const MAX_THRUST = 3200;
 const STALL_SPEED = 28.3; // ~55 kn
 const FUEL_BURN = 0.0075; // per second at full throttle (fraction of a full tank)
 const GEAR_DROP = 1.55; // CG height above the wheels
@@ -100,9 +100,10 @@ export function createFlight() {
     const rollRate = (controls.roll || 0) * 2.4 * authority;
     const yawRate = (controls.yaw || 0) * 0.7 * authority;
     if (state.onGround) {
-      // On the ground the plane only steers and pitches a little.
-      dq.setFromAxisAngle(UP, yawRate * dt * 0.9);
-      state.quat.multiply(dq);
+      // On the ground the plane can be steered and rotated (nose up) but not rolled.
+      euler.set(pitchRate * dt, yawRate * dt * 0.9, 0, 'YXZ');
+      dq.setFromEuler(euler);
+      state.quat.multiply(dq).normalize();
     } else {
       euler.set(pitchRate * dt, yawRate * dt, rollRate * dt, 'YXZ');
       dq.setFromEuler(euler);
@@ -168,53 +169,58 @@ export function createFlight() {
    * Ground contact and landing/crash test. `groundY` is terrain height at the plane; returns an
    * event string: 'landed', 'crashed', 'rolling' or null.
    */
-  function groundContact(groundY, onRunway) {
+  function groundContact(groundY, onRunway, dt) {
     const wheels = state.pos.y - GEAR_DROP;
-    if (wheels > groundY + 0.05) {
+    const pitchAngle = Math.asin(clamp(fwd.y, -1, 1));
+    const bankAngle = Math.abs(Math.atan2(right.y, up.y));
+    if (wheels > groundY + 0.06) {
       state.onGround = false;
       return null;
     }
-    // Touchdown.
-    const bankAngle = Math.abs(Math.atan2(right.y, up.y));
-    const pitchAngle = Math.asin(clamp(fwd.y, -1, 1));
-    const vs = state.vel.y;
     const wasAir = !state.onGround;
-    state.onGround = true;
-    state.pos.y = groundY + GEAR_DROP;
-    state.vel.y = 0;
+    const vs = state.vel.y;
 
     if (wasAir) {
-      const hard = vs < -3.6 || bankAngle > 0.32 || pitchAngle < -0.22 || !onRunway && state.airspeed > 62;
+      // Touchdown: gentle landing or crash, graded by vertical speed, bank and pitch.
+      state.onGround = true;
+      state.pos.y = groundY + GEAR_DROP;
+      state.vel.y = 0;
+      const hard = vs < -3.6 || bankAngle > 0.32 || pitchAngle < -0.22 || (!onRunway && state.airspeed > 62);
       if (hard || state.damage >= 100) {
         state.damage = 100;
         state.crashed = true;
         state.landingGrade = 'F';
         return 'crashed';
       }
-      // Grade the landing.
       const sev = -vs + bankAngle * 6 + Math.abs(pitchAngle) * 4;
       state.landingGrade = sev < 1.4 ? 'A' : sev < 2.4 ? 'B' : sev < 3.4 ? 'C' : sev < 4.6 ? 'D' : 'F';
       state.damage = Math.min(100, state.damage + Math.max(0, sev - 1.2) * 4);
       state.landed = true;
-      // Touchdown scrub.
       state.vel.x *= 0.9;
       state.vel.z *= 0.9;
       return 'landed';
     }
-    // Rolling on the ground: friction, brakes, keep wings level.
+
+    // Already rolling: lift off when fast enough, with power on and the nose raised.
+    if (state.airspeed > 26 && state.throttle > 0.6 && pitchAngle > 0.02) {
+      state.onGround = false;
+      state.pos.y = groundY + GEAR_DROP + 0.15;
+      state.vel.y = Math.max(state.vel.y, 2.2);
+      return 'airborne';
+    }
+    state.pos.y = groundY + GEAR_DROP;
+    if (state.vel.y < 0) state.vel.y = 0;
     const speed = Math.hypot(state.vel.x, state.vel.z);
     if (speed > 0.05) {
-      const fr = state.brakes ? 6.5 : 1.1;
+      const fr = state.brakes ? 6.5 : 0.6;
       const drop = Math.min(speed, fr * dt);
-      const nx = state.vel.x / speed;
-      const nz = state.vel.z / speed;
-      state.vel.x -= nx * drop;
-      state.vel.z -= nz * drop;
+      state.vel.x -= (state.vel.x / speed) * drop;
+      state.vel.z -= (state.vel.z / speed) * drop;
     }
-    // Level the wings and settle pitch while rolling.
+    // Settle the roll while rolling, keeping the pilot's pitch and yaw.
     const yaw = Math.atan2(fwd.x, -fwd.z);
-    const level = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, yaw, 0, 'YXZ'));
-    state.quat.slerp(level, Math.min(1, dt * 3));
+    const target = new THREE.Quaternion().setFromEuler(new THREE.Euler(pitchAngle, yaw, 0, 'YXZ'));
+    state.quat.slerp(target, Math.min(1, dt * 2.5));
     return 'rolling';
   }
 
